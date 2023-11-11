@@ -2,7 +2,6 @@ package cli;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Scanner;
 
 import entidades.evento.Evento;
@@ -22,7 +21,6 @@ public class Cli {
         Ingresso ingresso = null;
         Scanner leitor = new Scanner(System.in);
         int opcao;
-        String busca;
         Evento eventoBuscado;
 
         System.out.println("Seja bem-vindo ao programa de venda de ingressos de eventos!");
@@ -40,16 +38,14 @@ public class Cli {
                     exibirEvento(eventos);
                     break;
                 case 3:
-                    // exibirIngressosRestantes(eventos);
+                    exibirIngressosRestantes(eventos);
                     break;
                 case 4:
-                    System.out.print("Digite o nome do evento que você quer: ");
-                    busca = leitor.nextLine();
-                    eventoBuscado = buscarEventoPorNome(eventos, busca);
+                    eventoBuscado = buscarEventoPorNome(eventos, leitor);
                     System.out.println(eventoBuscado);
                     break;
                 case 11:
-                    // ingresso = venderIngresso(evento, leitor);
+                    ingresso = venderIngresso(eventos, leitor);
                     break;
                 case 12:
                     exibirIngresso(ingresso);
@@ -62,9 +58,11 @@ public class Cli {
         }
     }
 
-    private static Evento buscarEventoPorNome(List<Evento> eventos, String nomeDoEvento) {
+    private static Evento buscarEventoPorNome(List<Evento> eventos, Scanner leitor) {
+        System.out.print("Digite o nome do evento que você quer: ");
+        String busca = leitor.nextLine();
         for (Evento evento : eventos) {
-            if (evento.getNome().equalsIgnoreCase(nomeDoEvento)) {
+            if (evento.getNome().equalsIgnoreCase(busca)) {
                 return evento;
             } 
         }
@@ -90,65 +88,64 @@ public class Cli {
         }
     }
 
-    // private static Ingresso venderIngresso(List<Evento> eventos, Scanner leitor) {
-    //     for (Evento evento : eventos) {
-    //         if (evento == null) {
-    //             System.out.println("Evento ainda não foi cadastrado!");
-    //             return null;
-    //         }
+    private static Ingresso venderIngresso(List<Evento> eventos, Scanner leitor) {
+        Evento evento = buscarEventoPorNome(eventos, leitor);
+        if (evento == null) {
+            return null;
+        } 
 
-    //     String tipo;
-    //     TipoIngresso tipoIngresso;
-    //     int quantidade;
-    //     Ingresso ingresso;
+        String tipo;
+        TipoIngresso tipoIngresso;
+        int quantidade;
+        Ingresso ingresso;
 
-    //     System.out.print("Informe o tipo do ingresso (meia ou inteira): ");
-    //     tipo = leitor.next();
-    //     if (!(tipo.equals("meia") || tipo.equals("inteira"))) {
-    //         System.out.println("Tipo selecionado inválido!");
-    //         return null;
-    //     }
+        System.out.print("Informe o tipo do ingresso (meia ou inteira): ");
+        tipo = leitor.next();
+        if (!(tipo.equals("meia") || tipo.equals("inteira"))) {
+            System.out.println("Tipo selecionado inválido!");
+            return null;
+        }
 
-    //     tipoIngresso = tipo.equals("meia") ? TipoIngresso.MEIA : TipoIngresso.INTEIRA;
+        tipoIngresso = tipo.equals("meia") ? TipoIngresso.MEIA : TipoIngresso.INTEIRA;
 
-    //     System.out.print("Informe quantos ingressos você deseja: ");
-    //     quantidade = leitor.nextInt();
+        System.out.print("Informe quantos ingressos você deseja: ");
+        quantidade = leitor.nextInt();
 
-    //     if (!evento.isIngressoDisponivel(tipoIngresso, quantidade)) {
-    //         System.out.println("Não há ingressos disponíveis desse tipo!");
-    //         return null;
-    //     }
+        if (!evento.isIngressoDisponivel(tipoIngresso, quantidade)) {
+            System.out.println("Não há ingressos disponíveis desse tipo!");
+            return null;
+        }
 
-    //     if (evento instanceof Jogo) {
-    //         int percentual;
+        if (evento instanceof Jogo) {
+            int percentual;
 
-    //         System.out.print("Informe o percentual do desconto de sócio torcedor: ");
-    //         percentual = leitor.nextInt();
-    //         ingresso = new IngJogo(evento, tipoIngresso, percentual);
-    //     } else if (evento instanceof Show) {
-    //         String localizacao;
+            System.out.print("Informe o percentual do desconto de sócio torcedor: ");
+            percentual = leitor.nextInt();
+            ingresso = new IngJogo(evento, tipoIngresso, percentual);
+        } else if (evento instanceof Show) {
+            String localizacao;
 
-    //         System.out.print("Informe a localização do ingresso (pista ou camarote): ");
-    //         localizacao = leitor.next();
+            System.out.print("Informe a localização do ingresso (pista ou camarote): ");
+            localizacao = leitor.next();
 
-    //         if (!(localizacao.equals("pista") || localizacao.equals("camarote"))) {
-    //             System.out.println("Localização inválida!");
-    //             return null;
-    //         }
-    //         ingresso = new IngShow(evento, tipoIngresso, localizacao);
-    //     } else {
-    //         String desconto;
+            if (!(localizacao.equals("pista") || localizacao.equals("camarote"))) {
+                System.out.println("Localização inválida!");
+                return null;
+            }
+            ingresso = new IngShow(evento, tipoIngresso, localizacao);
+        } else {
+            String desconto;
 
-    //         System.out.print("Informe se possui desconto social (s/n): ");
-    //         desconto = leitor.next();
+            System.out.print("Informe se possui desconto social (s/n): ");
+            desconto = leitor.next();
 
-    //         ingresso = new IngExposicao(evento, tipoIngresso, desconto.equals("s"));
-    //     }
+            ingresso = new IngExposicao(evento, tipoIngresso, desconto.equals("s"));
+        }
 
-    //     evento.venderIngresso(tipoIngresso, quantidade);
-    //     System.out.println("Ingresso vendido com sucesso!");
-    //     return ingresso;
-    // }
+        evento.venderIngresso(tipoIngresso, quantidade);
+        System.out.println("Ingresso vendido com sucesso!");
+        return ingresso;
+    }
 
     private static void exibirIngressosRestantes(List<Evento> eventos) {
         for (Evento evento : eventos) {
