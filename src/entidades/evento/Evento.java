@@ -1,16 +1,19 @@
 package entidades.evento;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 import entidades.ingresso.TipoIngresso;
 
 public abstract class Evento {
     private String nome;
-    private String data;
+    private LocalDate data;
     private String local;
     private int ingressosMeia;
     private int ingressosInteira;
     private double precoCheio;
 
-    public Evento(String nome, String data, String local, int ingressosMeia, int ingressosInteira, double precoCheio) {
+    public Evento(String nome, LocalDate data, String local, int ingressosMeia, int ingressosInteira, double precoCheio) {
         this.nome = nome;
         this.data = data;
         this.local = local;
@@ -27,8 +30,20 @@ public abstract class Evento {
         return this.nome;
     }
 
-    public int getIngressos() {
-        return this.ingressosInteira + this.ingressosMeia;
+    public void SetLocal(String local){
+        this.local = local;
+    }
+
+    public void SetData(LocalDate data){
+        this.data = data;
+    }
+
+    public int getIngressosMeia() {
+        return this.ingressosMeia;
+    }
+
+    public int getIngressosInteira() {
+        return this.ingressosInteira;
     }
 
     public boolean isIngressoDisponivel(TipoIngresso tipo, int quantidade) {
@@ -50,7 +65,9 @@ public abstract class Evento {
     }
 
     @Override
-    public String toString() {
-        return this.nome + " - " + this.data + " - " + this.local;
-    }
+public String toString() {
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    String dataFormatada = this.data.format(formatter);
+    return this.nome + " - " + dataFormatada + " - " + this.local;
+}
 }

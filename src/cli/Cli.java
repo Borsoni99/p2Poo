@@ -1,5 +1,10 @@
 package cli;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -44,17 +49,33 @@ public class Cli {
                     eventoBuscado = buscarEventoPorNome(eventos, leitor);
                     System.out.println(eventoBuscado);
                     break;
+                case 5:
+                    excluirEvento(eventos, leitor);
+                    break;
+                case 6:
+                    atualizaEvento(eventos, leitor);
+                    break;
                 case 11:
                     ingresso = venderIngresso(eventos, leitor);
                     break;
-                case 12:
-                    exibirIngresso(ingresso);
-                    break;
                 default:
+                    persistirDados(eventos);
                     leitor.close();
                     System.out.println("Volte sempre!");
                     return 0;
             }
+        }
+    }
+
+    private static void persistirDados(List<Evento> eventos) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("dados_eventos.txt"))) {
+            for (Evento evento : eventos) {
+                writer.write(evento.toString());
+                writer.newLine();
+            }
+            System.out.println("Dados persistidos com sucesso!");
+        } catch (IOException e) {
+            System.out.println("Erro ao persistir dados: " + e.getMessage());
         }
     }
 
@@ -64,7 +85,35 @@ public class Cli {
         for (Evento evento : eventos) {
             if (evento.getNome().equalsIgnoreCase(busca)) {
                 return evento;
-            } 
+            }
+        }
+        return null;
+    }
+
+    private static Evento atualizaEvento(List<Evento> eventos, Scanner leitor) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        System.out.print("Digite o nome do evento que você quer atualizar: ");
+        String busca = leitor.nextLine();
+
+
+        for (Evento evento : eventos) {
+            if (evento.getNome().equalsIgnoreCase(busca)) {
+                System.out.print("Informe a nova data do evento (formato dd/MM/yyyy) | Caso não queira mudar a data deixe em branco: ");
+                String dataString = leitor.nextLine();
+                System.out.print("Informe o local do evento | Caso não queira mudar o local deixe em branco: ");
+                String local = leitor.nextLine();
+
+                if (dataString != ""){
+                    LocalDate data = LocalDate.parse(dataString, formatter);
+                    evento.SetData(data);
+                }
+
+                if (local != ""){
+                    evento.SetLocal(local);
+                }
+                return evento;
+            }
         }
         return null;
     }
@@ -76,23 +125,25 @@ public class Cli {
         System.out.println("2 - Exibir evento cadastrado;");
         System.out.println("3 - Exibir ingressos restantes;");
         System.out.println("4 - Buscar evento por nome;");
+        System.out.println("5 - Excluir evento;");
+        System.out.println("6 - Atualizar evento;");
         System.out.println("11 - Vender um ingresso;");
-        System.out.println("12 - Exibir último ingresso vendido;");
+        //System.out.println("12 - Exibir último ingresso vendido;");
     }
 
-    private static void exibirIngresso(Ingresso ingresso) {
-        if (ingresso == null) {
-            System.out.println("Nenhum ingresso foi vendido!");
-        } else {
-            System.out.println(ingresso);
-        }
-    }
+   // private static void exibirIngresso(Ingresso ingresso) {
+      //  if (ingresso == null) {
+      //      System.out.println("Nenhum ingresso foi vendido!");
+      //  } else {
+     //       System.out.println(ingresso);
+    //    }
+   // }
 
     private static Ingresso venderIngresso(List<Evento> eventos, Scanner leitor) {
         Evento evento = buscarEventoPorNome(eventos, leitor);
         if (evento == null) {
             return null;
-        } 
+        }
 
         String tipo;
         TipoIngresso tipoIngresso;
@@ -152,7 +203,7 @@ public class Cli {
             if (evento == null) {
                 System.out.println("Evento ainda não foi cadastrado!");
             } else {
-                System.out.println("Ingressos restantes: " + evento.getIngressos());
+                System.out.println("evento: " +evento.getNome()+ ", Ingressos inteira restantes: " + evento.getIngressosInteira()+ ", Ingressos meia restantes: " + evento.getIngressosMeia());
             }
         }
     }
@@ -168,64 +219,87 @@ public class Cli {
 
     }
 
-    private static void cadastrarEvento(Scanner leitor, List<Evento> eventos) {
-        String nome, data, local, tipo;
-        int ingMeia, ingInteira;
-        double preco;
-        String continuar = "s";
+    private static Evento excluirEvento(List<Evento> eventos, Scanner leitor) {
+        System.out.print("Digite o nome do evento que você quer excluir: ");
+        String busca = leitor.nextLine();
 
-        while (continuar.equalsIgnoreCase("s")) {
-            System.out.print("Informe o nome do evento: ");
-            nome = leitor.next();
-            System.out.print("Informe a data do evento: ");
-            data = leitor.next();
-            System.out.print("Informe o local do evento: ");
-            local = leitor.next();
-            System.out.print("Informe o número de entradas tipo meia: ");
-            ingMeia = leitor.nextInt();
-            System.out.print("Informe o número de entradas tipo inteira: ");
-            ingInteira = leitor.nextInt();
-            System.out.print("Informe o preço cheio do evento: ");
-            preco = leitor.nextDouble();
-            System.out.print("Informe o tipo do evento (show, jogo ou exposição): ");
-            tipo = leitor.next();
-
-            if (tipo.equals("show")) {
-                String artista, genero;
-
-                System.out.print("Informe o nome do artista: ");
-                artista = leitor.next();
-                System.out.print("Informe o gênero do show: ");
-                genero = leitor.next();
-
-                eventos.add(new Show(nome, data, local, ingMeia, ingInteira, preco, artista, genero));
+        for (int i = 0; i < eventos.size(); i++) {
+            Evento evento = eventos.get(i);
+            if (evento.getNome().equalsIgnoreCase(busca)) {
+                eventos.remove(i);
+                System.out.println("Evento removido com sucesso.");
+                return evento;
             }
-
-            if (tipo.equals("jogo")) {
-                String esporte, casa, adversario;
-
-                System.out.print("Informe o esporte: ");
-                esporte = leitor.next();
-                System.out.print("Informe a equipe da casa: ");
-                casa = leitor.next();
-                System.out.print("Informe a equipe adversária: ");
-                adversario = leitor.next();
-
-                eventos.add(new Jogo(nome, data, local, ingMeia, ingInteira, preco, esporte, casa, adversario));
-            }
-
-            if (tipo.equals("exposição")) {
-                int idadeMin, duracao;
-
-                System.out.print("Informe a idade mínima para entrar na exposição: ");
-                idadeMin = leitor.nextInt();
-                System.out.print("Informe a duração em dias da exposição: ");
-                duracao = leitor.nextInt();
-
-                eventos.add(new Exposicao(nome, data, local, ingMeia, ingInteira, preco, idadeMin, duracao));
-            }
-            System.out.print("Deseja cadastrar outro evento? (s/n): ");
-            continuar = leitor.next();
         }
+
+        System.out.println("Este evento não existe na lista.");
+        return null;
     }
+
+
+
+private static void cadastrarEvento(Scanner leitor, List<Evento> eventos) {
+    String nome, local, tipo;
+    int ingMeia, ingInteira;
+    double preco;
+    LocalDate data;
+    String continuar = "s";
+
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+    while (continuar.equalsIgnoreCase("s")) {
+        System.out.print("Informe o nome do evento: ");
+        nome = leitor.next();
+        System.out.print("Informe a data do evento (formato dd/MM/yyyy): ");
+        data = LocalDate.parse(leitor.next(), formatter);
+        System.out.print("Informe o local do evento: ");
+        local = leitor.next();
+        System.out.print("Informe o número de entradas tipo meia: ");
+        ingMeia = leitor.nextInt();
+        System.out.print("Informe o número de entradas tipo inteira: ");
+        ingInteira = leitor.nextInt();
+        System.out.print("Informe o preço cheio do evento: ");
+        preco = leitor.nextDouble();
+        System.out.print("Informe o tipo do evento (show, jogo ou exposição): ");
+        tipo = leitor.next();
+
+        if (tipo.equals("show")) {
+            String artista, genero;
+
+            System.out.print("Informe o nome do artista: ");
+            artista = leitor.next();
+            System.out.print("Informe o gênero do show: ");
+            genero = leitor.next();
+
+            eventos.add(new Show(nome, data, local, ingMeia, ingInteira, preco, artista, genero));
+        }
+
+        if (tipo.equals("jogo")) {
+            String esporte, casa, adversario;
+
+            System.out.print("Informe o esporte: ");
+            esporte = leitor.next();
+            System.out.print("Informe a equipe da casa: ");
+            casa = leitor.next();
+            System.out.print("Informe a equipe adversária: ");
+            adversario = leitor.next();
+
+            eventos.add(new Jogo(nome, data, local, ingMeia, ingInteira, preco, esporte, casa, adversario));
+        }
+
+        if (tipo.equals("exposição")) {
+            int idadeMin, duracao;
+
+            System.out.print("Informe a idade mínima para entrar na exposição: ");
+            idadeMin = leitor.nextInt();
+            System.out.print("Informe a duração em dias da exposição: ");
+            duracao = leitor.nextInt();
+
+            eventos.add(new Exposicao(nome, data, local, ingMeia, ingInteira, preco, idadeMin, duracao));
+        }
+        System.out.print("Deseja cadastrar outro evento? (s/n): ");
+        continuar = leitor.next();
+    }
+}
+
 }
