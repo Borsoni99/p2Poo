@@ -12,6 +12,6 @@ public class IngJogo extends Ingresso {
 
     @Override
     public double getPreco() {
-        return super.getPreco() * this.percentualDescontoTorcedor / 100;
+        return super.getPreco() * (this.percentualDescontoTorcedor / 100);
     }
 }

@@ -8,11 +8,7 @@ public abstract class Ingresso {
 
     public Ingresso(Evento evento, TipoIngresso tipo) {
         this.evento = evento;
-        if (tipo.equals("meia")) {
-            this.tipo = TipoIngresso.MEIA;
-        } else {
-            this.tipo = TipoIngresso.INTEIRA;
-        }
+        this.tipo = tipo;
     }
 
     public double getPreco() {
