@@ -23,7 +23,6 @@ import entidades.ingresso.IngShow;
 public class Cli {
     public static int executar() {
         List<Evento> eventos = new ArrayList<>();
-        Ingresso ingresso = null;
         Scanner leitor = new Scanner(System.in);
         int opcao;
         Evento eventoBuscado;
@@ -56,7 +55,7 @@ public class Cli {
                     atualizaEvento(eventos, leitor);
                     break;
                 case 11:
-                    ingresso = venderIngresso(eventos, leitor);
+                    venderIngresso(eventos, leitor);
                     break;
                 default:
                     persistirDados(eventos);
@@ -128,16 +127,7 @@ public class Cli {
         System.out.println("5 - Excluir evento;");
         System.out.println("6 - Atualizar evento;");
         System.out.println("11 - Vender um ingresso;");
-        //System.out.println("12 - Exibir último ingresso vendido;");
     }
-
-   // private static void exibirIngresso(Ingresso ingresso) {
-      //  if (ingresso == null) {
-      //      System.out.println("Nenhum ingresso foi vendido!");
-      //  } else {
-     //       System.out.println(ingresso);
-    //    }
-   // }
 
     private static Ingresso venderIngresso(List<Evento> eventos, Scanner leitor) {
         Evento evento = buscarEventoPorNome(eventos, leitor);
